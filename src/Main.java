@@ -10,39 +10,25 @@ public class Main {
     private static final BlockingQueue<String> queueA = new ArrayBlockingQueue<>(MAX_QUEUE_SIZE);
     private static final BlockingQueue<String> queueB = new ArrayBlockingQueue<>(MAX_QUEUE_SIZE);
     private static final BlockingQueue<String> queueC = new ArrayBlockingQueue<>(MAX_QUEUE_SIZE);
-    private static final AtomicInteger countA = new AtomicInteger(0);
-    private static final AtomicInteger countB = new AtomicInteger(0);
-    private static final AtomicInteger countC = new AtomicInteger(0);
+    private static int countA;
+    private static int countB;
+    private static int countC;
     private static volatile boolean isRunning = true;
 
     public static void main(String[] args) throws InterruptedException {
         Thread generatorThread = new Thread(() -> {
             for (int i = 0; i < MAX_STRING_SIZE; i++) {
                 String text = generateText("abc", MAX_LETTER_SIZE);
-                if (text.contains("a")) {
                     try {
                         queueA.put(text);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                if (text.contains("b")) {
-                    try {
                         queueB.put(text);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                if (text.contains("c")) {
-                    try {
                         queueC.put(text);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        return;
                     }
                 }
-            }
-            isRunning = false;
-        });
+                isRunning = false;
+            });
 
         Thread analyzTextA = new Thread(() -> {
             while (isRunning || !queueA.isEmpty()) {
@@ -101,16 +87,16 @@ public class Main {
             }
         }
         if (letter == 'a') {
-            if (count > countA.get()) {
-                countA.getAndAdd(count);
+            if (count > countA) {
+                countA = count;
             }
         } else if (letter == 'b') {
-            if (count > countB.get()) {
-                countB.getAndAdd(count);
+            if (count > countB) {
+                countB = count;
             }
         } else if (letter == 'c') {
-            if (count > countC.get()) {
-                countC.getAndAdd(count);
+            if (count > countC) {
+                countC = count;
             }
         }
     }
